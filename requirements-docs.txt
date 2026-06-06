@@ -1,0 +1,10 @@
+# Зависимости только для сборки документации в PDF (md2pdf.py).
+# Не нужны для самого нагрузочного теста — ставьте при необходимости:
+#   pip install -r requirements-docs.txt
+#
+# Дополнительно требуется WeasyPrint (HTML → PDF):
+#   macOS:  brew install weasyprint
+#   Ubuntu: sudo apt install weasyprint
+#   либо:   pip install weasyprint   (нужны системные libpango/cairo)
+markdown>=3.5
+pygments>=2.17
