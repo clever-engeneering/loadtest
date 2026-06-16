@@ -538,7 +538,7 @@ async def run(args) -> None:
         report_path = args.report or os.path.join(
             REPORTS_DIR, f"loadtest_report_{started_at:%Y%m%d_%H%M%S}.pdf")
         try:
-            generate_pdf_report(report_path, args, stats, total_time, started_at, fd_limit, tags)
+            generate_pdf_report(report_path, args, stats, total_time, started_at, fd_limit, tags, seq_pool)
         except Exception as e:
             print(f"  Не удалось сформировать PDF-отчёт: {e}", file=sys.stderr)
     print("=" * 80)
@@ -591,6 +591,7 @@ def _print_summary(
 def generate_pdf_report(
     path: str, args, stats: Stats, total_time: float,
     started_at: datetime, fd_limit: int, tags: list[str],
+    seq_pool=None,
 ) -> None:
     try:
         import matplotlib
@@ -764,9 +765,15 @@ def generate_pdf_report(
                  color=vcolor, va="center")
         axc.text(0.205, 0.719, verdict, fontsize=11.5, color="#0f172a", va="center")
 
-        params = [
+        # One row per endpoint so every name is always visible
+        if not tags:
+            ep_rows = [["Endpoint-ы", "все (9 endpoint-ов)"]]
+        else:
+            ep_rows = [["Endpoint-ы", tags[0]]] + [["", t] for t in tags[1:]]
+
+        mode_row = ["Режим", f"Sequential (проходов: {seq_pool.passes})" if seq_pool else "Random"]
+        params = ep_rows + [mode_row] + [
             ["Base URL", args.base_url],
-            ["Endpoint-ы", fmt_endpoints(tags)],
             ["Файл данных", args.file],
             ["Соединений (макс.)", fmt_int(args.connections)],
             ["Ramp-up", f"{args.ramp:g} с"],
@@ -789,11 +796,20 @@ def generate_pdf_report(
             results.append(["Задержка p50 / p90", f"{pct['p50']:.1f} / {pct['p90']:.1f} мс"])
             results.append(["Задержка p95 / p99", f"{pct['p95']:.1f} / {pct['p99']:.1f} мс"])
 
-        axc.text(0.06, 0.665, "Параметры теста", fontsize=12, fontweight="bold", color=PRIMARY)
-        axc.text(0.06, 0.400, "Итоговые результаты", fontsize=12, fontweight="bold", color=PRIMARY)
-        styled_table(fig.add_axes([0.06, 0.440, 0.88, 0.210]),
+        # Dynamic vertical layout: 0.019 figure-fraction per table row
+        ROW_H = 0.019
+        PARAMS_TOP = 0.650
+        params_h = len(params) * ROW_H
+        params_bot = PARAMS_TOP - params_h
+        res_label_y = params_bot - 0.030
+        results_h = len(results) * ROW_H
+        results_bot = max(0.022, res_label_y - results_h - 0.010)
+
+        axc.text(0.06, PARAMS_TOP + 0.015, "Параметры теста", fontsize=12, fontweight="bold", color=PRIMARY)
+        axc.text(0.06, res_label_y, "Итоговые результаты", fontsize=12, fontweight="bold", color=PRIMARY)
+        styled_table(fig.add_axes([0.06, params_bot, 0.88, params_h]),
                      params, ["Параметр", "Значение"], [0.55, 0.45])
-        styled_table(fig.add_axes([0.06, 0.055, 0.88, 0.330]),
+        styled_table(fig.add_axes([0.06, results_bot, 0.88, results_h]),
                      results, ["Показатель", "Значение"], [0.55, 0.45])
 
         add_footer(fig)

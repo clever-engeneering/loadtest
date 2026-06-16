@@ -58,9 +58,23 @@ pip install aiohttp matplotlib
 
 ## Примеры HTTP-запросов
 
-Для каждого endpoint приведён эквивалентный `curl`-запрос. Значения в фигурных скобках берутся из соответствующих полей JSONL-записи.
+Для каждого endpoint приведён полный список отправляемых параметров и эквивалентный `curl`.  
+Значения примеров взяты из первой записи файла (`ClientID: 4a8379f7-…`, `Inn: 744725130545` и т.д.).
+
+**Заголовки, общие для всех запросов:**
+
+| Заголовок | Источник | Пример значения |
+|-----------|----------|-----------------|
+| `accept` | фиксированный | `application/json` |
+| `x-client-id` | поле `ClientID` из записи | `4a8379f7-d924-4064-80bf-974d647de0f2` |
+| `x-api-key` | аргумент `--api-key` | `bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec` |
+
+---
 
 ### GetUser — GET /users
+
+Параметры: только заголовки (см. выше). Тело и query-параметры отсутствуют.
+
 ```bash
 curl -X GET "http://HOST/users" \
   -H "accept: application/json" \
@@ -68,7 +82,12 @@ curl -X GET "http://HOST/users" \
   -H "x-api-key: bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec"
 ```
 
+---
+
 ### GetSourcesInfo — GET /sources
+
+Параметры: только заголовки. Тело и query-параметры отсутствуют.
+
 ```bash
 curl -X GET "http://HOST/sources" \
   -H "accept: application/json" \
@@ -76,7 +95,24 @@ curl -X GET "http://HOST/sources" \
   -H "x-api-key: bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec"
 ```
 
+---
+
 ### GetOperations — POST /operations
+
+Дополнительный заголовок: `content-type: application/json`.
+
+**Тело запроса (JSON):**
+
+| Поле | Источник | Пример значения |
+|------|----------|-----------------|
+| `inn` | поле `Inn` из записи | `"744725130545"` |
+| `tax_rate` | поле `TaxRate` из записи | `6` |
+| `tax_system` | поле `TaxSystem` из записи | `"usn_d"` |
+| `start_year` | поле `StartYear` из записи | `2026` |
+| `pagination.page_number` | фиксированный | `1` |
+| `pagination.row_count` | фиксированный | `20` |
+| `pagination.request_id` | генерируется `uuid.uuid4()` перед каждым запросом | `"07b87c7e-…"` |
+
 ```bash
 curl -X POST "http://HOST/operations" \
   -H "accept: application/json" \
@@ -95,9 +131,13 @@ curl -X POST "http://HOST/operations" \
     }
   }'
 ```
-`request_id` генерируется как случайный UUID v4 перед каждым запросом — значения никогда не повторяются. Поля `inn`, `tax_rate`, `tax_system`, `start_year` берутся из соответствующей JSONL-записи (`Inn`, `TaxRate`, `TaxSystem`, `StartYear`).
+
+---
 
 ### GetTasks — GET /tasks
+
+Параметры: только заголовки. Тело и query-параметры отсутствуют.
+
 ```bash
 curl -X GET "http://HOST/tasks" \
   -H "accept: application/json" \
@@ -105,7 +145,12 @@ curl -X GET "http://HOST/tasks" \
   -H "x-api-key: bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec"
 ```
 
+---
+
 ### ListCompletedTasks — GET /tasks/completed
+
+Параметры: только заголовки. Тело и query-параметры отсутствуют.
+
 ```bash
 curl -X GET "http://HOST/tasks/completed" \
   -H "accept: application/json" \
@@ -113,7 +158,12 @@ curl -X GET "http://HOST/tasks/completed" \
   -H "x-api-key: bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec"
 ```
 
+---
+
 ### GetTaxLimits — GET /references/tax_limits
+
+Параметры: только заголовки. Тело и query-параметры отсутствуют.
+
 ```bash
 curl -X GET "http://HOST/references/tax_limits" \
   -H "accept: application/json" \
@@ -121,32 +171,56 @@ curl -X GET "http://HOST/references/tax_limits" \
   -H "x-api-key: bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec"
 ```
 
+---
+
 ### GetOperationById — GET /operations/{OperationID}
+
+**Path-параметр:**
+
+| Параметр | Источник | Пример значения |
+|----------|----------|-----------------|
+| `{OperationID}` | поле `OperationID` из записи | `cbb6e2de-ce9f-4d52-a662-f867a8dbf2fe_40802810800007141754_044525974` |
+
 ```bash
 curl -X GET "http://HOST/operations/cbb6e2de-ce9f-4d52-a662-f867a8dbf2fe_40802810800007141754_044525974" \
   -H "accept: application/json" \
   -H "x-client-id: 4a8379f7-d924-4064-80bf-974d647de0f2" \
   -H "x-api-key: bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec"
 ```
-Значение подставляется из поля `OperationID`.
+
+---
 
 ### GetSourceState — GET /sources/{RequestID}/state
+
+**Path-параметр:**
+
+| Параметр | Источник | Пример значения |
+|----------|----------|-----------------|
+| `{RequestID}` | поле `RequestID` из записи | `76cece8a-8a97-49e3-8bcb-13c6c8006af5` |
+
 ```bash
 curl -X GET "http://HOST/sources/76cece8a-8a97-49e3-8bcb-13c6c8006af5/state" \
   -H "accept: application/json" \
   -H "x-client-id: 4a8379f7-d924-4064-80bf-974d647de0f2" \
   -H "x-api-key: bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec"
 ```
-Значение подставляется из поля `RequestID`.
+
+---
 
 ### GetFnsFlowFullInfo — GET /fns_reports/flows/{FlowID}/detailed
+
+**Path-параметр:**
+
+| Параметр | Источник | Пример значения |
+|----------|----------|-----------------|
+| `{FlowID}` | поле `FlowID` из записи | `4f01b975-7d5d-43b2-a296-fdcec42459ca` |
+
 ```bash
 curl -X GET "http://HOST/fns_reports/flows/4f01b975-7d5d-43b2-a296-fdcec42459ca/detailed" \
   -H "accept: application/json" \
   -H "x-client-id: 4a8379f7-d924-4064-80bf-974d647de0f2" \
   -H "x-api-key: bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec"
 ```
-Значение подставляется из поля `FlowID`.
 
 ---
 
