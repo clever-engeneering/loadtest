@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import os
 import random
 import signal
 import sys
@@ -41,6 +42,9 @@ LATENCY_RESERVOIR_CAP = 50000
 # Сколько секунд ждать штатного завершения воркеров при остановке, прежде чем
 # принудительно их отменить (на каждом этапе: штатно, затем после cancel).
 GRACEFUL_STOP_SECONDS = 5.0
+
+# Папка, куда по умолчанию складываются PDF-отчёты.
+REPORTS_DIR = "reports"
 
 
 def raise_fd_limit(target: int = 200000) -> int:
@@ -388,7 +392,8 @@ async def run(args):
 
     # PDF-отчёт.
     if not args.no_report:
-        report_path = args.report or f"loadtest_report_{started_at:%Y%m%d_%H%M%S}.pdf"
+        report_path = args.report or os.path.join(
+            REPORTS_DIR, f"loadtest_report_{started_at:%Y%m%d_%H%M%S}.pdf")
         try:
             generate_pdf_report(report_path, args, stats, total_time, started_at, fd_limit)
         except Exception as e:
@@ -413,6 +418,10 @@ def generate_pdf_report(path: str, args, stats: Stats, total_time: float,
         print("\nPDF-отчёт пропущен: не установлен matplotlib (pip install matplotlib).",
               file=sys.stderr)
         return
+
+    # Гарантируем существование папки отчёта (и для дефолта reports/, и для
+    # явного --report путь/файл.pdf с вложенными каталогами).
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
 
     hist = stats.history
     pct = stats.percentiles_ms()
@@ -740,7 +749,7 @@ def main():
     p.add_argument("--timeout", "-t", type=float, default=30.0,
                    help="Таймаут одного запроса, секунд")
     p.add_argument("--report", default=None,
-                   help="Путь к PDF-отчёту (по умолчанию loadtest_report_<дата>.pdf)")
+                   help="Путь к PDF-отчёту (по умолчанию reports/loadtest_report_<дата>.pdf)")
     p.add_argument("--no-report", action="store_true",
                    help="Не формировать PDF-отчёт")
     args = p.parse_args()
