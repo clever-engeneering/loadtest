@@ -56,6 +56,90 @@ pip install aiohttp matplotlib
 
 ---
 
+## Примеры HTTP-запросов
+
+Для каждого endpoint приведён эквивалентный `curl`-запрос. Значения в фигурных скобках берутся из соответствующих полей JSONL-записи.
+
+### GetUser — GET /users
+```bash
+curl -X GET "http://HOST/users" \
+  -H "accept: application/json" \
+  -H "x-client-id: 4a8379f7-d924-4064-80bf-974d647de0f2" \
+  -H "x-api-key: bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec"
+```
+
+### GetSourcesInfo — GET /sources
+```bash
+curl -X GET "http://HOST/sources" \
+  -H "accept: application/json" \
+  -H "x-client-id: 4a8379f7-d924-4064-80bf-974d647de0f2" \
+  -H "x-api-key: bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec"
+```
+
+### GetOperations — POST /operations
+```bash
+curl -X POST "http://HOST/operations" \
+  -H "accept: application/json" \
+  -H "content-type: application/json" \
+  -H "x-client-id: 4a8379f7-d924-4064-80bf-974d647de0f2" \
+  -H "x-api-key: bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec" \
+  -d '{"inn": "744725130545", "tax_rate": 6, "tax_system": "usn_d", "start_year": 2026}'
+```
+Поля тела запроса: `Inn` → `inn`, `TaxRate` → `tax_rate`, `TaxSystem` → `tax_system`, `StartYear` → `start_year`.
+
+### GetTasks — GET /tasks
+```bash
+curl -X GET "http://HOST/tasks" \
+  -H "accept: application/json" \
+  -H "x-client-id: 4a8379f7-d924-4064-80bf-974d647de0f2" \
+  -H "x-api-key: bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec"
+```
+
+### ListCompletedTasks — GET /tasks/completed
+```bash
+curl -X GET "http://HOST/tasks/completed" \
+  -H "accept: application/json" \
+  -H "x-client-id: 4a8379f7-d924-4064-80bf-974d647de0f2" \
+  -H "x-api-key: bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec"
+```
+
+### GetTaxLimits — GET /references/tax_limits
+```bash
+curl -X GET "http://HOST/references/tax_limits" \
+  -H "accept: application/json" \
+  -H "x-client-id: 4a8379f7-d924-4064-80bf-974d647de0f2" \
+  -H "x-api-key: bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec"
+```
+
+### GetOperationById — GET /operations/{OperationID}
+```bash
+curl -X GET "http://HOST/operations/cbb6e2de-ce9f-4d52-a662-f867a8dbf2fe_40802810800007141754_044525974" \
+  -H "accept: application/json" \
+  -H "x-client-id: 4a8379f7-d924-4064-80bf-974d647de0f2" \
+  -H "x-api-key: bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec"
+```
+Значение подставляется из поля `OperationID`.
+
+### GetSourceState — GET /sources/{RequestID}/state
+```bash
+curl -X GET "http://HOST/sources/76cece8a-8a97-49e3-8bcb-13c6c8006af5/state" \
+  -H "accept: application/json" \
+  -H "x-client-id: 4a8379f7-d924-4064-80bf-974d647de0f2" \
+  -H "x-api-key: bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec"
+```
+Значение подставляется из поля `RequestID`.
+
+### GetFnsFlowFullInfo — GET /fns_reports/flows/{FlowID}/detailed
+```bash
+curl -X GET "http://HOST/fns_reports/flows/4f01b975-7d5d-43b2-a296-fdcec42459ca/detailed" \
+  -H "accept: application/json" \
+  -H "x-client-id: 4a8379f7-d924-4064-80bf-974d647de0f2" \
+  -H "x-api-key: bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec"
+```
+Значение подставляется из поля `FlowID`.
+
+---
+
 ## Параметры командной строки
 
 | Параметр | Короткий | По умолчанию | Описание |

@@ -635,6 +635,13 @@ def generate_pdf_report(
     def fmt_int(n):
         return f"{int(round(n)):,}".replace(",", " ")
 
+    def fmt_endpoints(t):
+        if not t or len(t) == 9:
+            return "все (9 endpoint-ов)"
+        if len(t) <= 3:
+            return ", ".join(t)
+        return f"{len(t)} endpoint-ов: " + ", ".join(t[:3]) + f" +{len(t) - 3}"
+
     if total == 0:
         succ_color = vcolor = MUTED
         verdict = "НЕТ ДАННЫХ — ответов не получено"
@@ -751,7 +758,7 @@ def generate_pdf_report(
 
         params = [
             ["Base URL", args.base_url],
-            ["Endpoint-ы", ", ".join(tags) if tags else "все"],
+            ["Endpoint-ы", fmt_endpoints(tags)],
             ["Файл данных", args.file],
             ["Соединений (макс.)", fmt_int(args.connections)],
             ["Ramp-up", f"{args.ramp:g} с"],
@@ -956,7 +963,7 @@ def generate_pdf_report(
         # ------------------------------------------------------------------ #
         if has_tags:
             fig, (axL, axR) = plt.subplots(1, 2, figsize=(11.69, 8.27))
-            fig.subplots_adjust(top=0.86, bottom=0.12, left=0.05, right=0.97, wspace=0.30)
+            fig.subplots_adjust(top=0.86, bottom=0.12, left=0.23, right=0.97, wspace=0.32)
             page_header(fig, "Сравнение задержек по endpoint", args.base_url)
 
             tag_colors_map = {tag: TAG_COLORS[i % len(TAG_COLORS)] for i, tag in enumerate(tags)}
@@ -974,7 +981,7 @@ def generate_pdf_report(
 
             bars95 = axL.barh(list(y_pos), p95_vals, color=colors_bar, alpha=0.85, height=0.6)
             axL.set_yticks(list(y_pos))
-            axL.set_yticklabels(tags, fontsize=8.5)
+            axL.set_yticklabels(tags, fontsize=7.5)
             axL.set_xlabel("задержка, мс")
             axL.set_title("p95 задержка по endpoint", loc="left", fontweight="bold", color=RED)
             axL.bar_label(bars95, labels=[f"{v:.0f}" for v in p95_vals],
@@ -987,7 +994,7 @@ def generate_pdf_report(
                         for t in tags]
             bars_rps = axR.barh(list(y_pos), rps_vals, color=colors_bar, alpha=0.85, height=0.6)
             axR.set_yticks(list(y_pos))
-            axR.set_yticklabels(tags, fontsize=8.5)
+            axR.set_yticklabels([])
             axR.set_xlabel("запросов/с")
             axR.set_title("Средний RPS по endpoint", loc="left", fontweight="bold", color=GREEN)
             axR.bar_label(bars_rps, labels=[f"{v:.1f}" for v in rps_vals],
