@@ -38,6 +38,7 @@ import argparse
 import asyncio
 import json
 import os
+import uuid
 import random
 import signal
 import sys
@@ -279,17 +280,23 @@ def build_request_pool(
                 "x-api-key": api_key,
             }
             body: str | None = None
+            body_factory = None
             if method == "POST":
                 headers["content-type"] = "application/json"
-                body = json.dumps({
-                    "inn": rec.get("Inn", ""),
-                    "tax_rate": rec.get("TaxRate", 0),
-                    "tax_system": rec.get("TaxSystem", ""),
-                    "start_year": rec.get("StartYear", 0),
+                body_factory = lambda r=rec: json.dumps({
+                    "inn": r.get("Inn", ""),
+                    "tax_rate": r.get("TaxRate", 0),
+                    "tax_system": r.get("TaxSystem", ""),
+                    "start_year": r.get("StartYear", 0),
+                    "pagination": {
+                        "page_number": 1,
+                        "row_count": 20,
+                        "request_id": str(uuid.uuid4()),
+                    },
                 })
 
             pool.append({"tag": tag, "method": method, "url": base_url + path,
-                         "headers": headers, "body": body})
+                         "headers": headers, "body": body, "body_factory": body_factory})
 
     if skipped:
         print(f"  Пропущено строк (неизвестный/отфильтрованный Tag): {skipped}", file=sys.stderr)
@@ -338,11 +345,12 @@ async def worker(
             req = get_req()
             start = time.perf_counter()
             try:
+                body = req["body_factory"]() if req["body_factory"] else req["body"]
                 async with session.request(
                     req["method"],
                     req["url"],
                     headers=req["headers"],
-                    data=req["body"],
+                    data=body,
                     timeout=aiohttp.ClientTimeout(total=timeout),
                 ) as resp:
                     await resp.read()

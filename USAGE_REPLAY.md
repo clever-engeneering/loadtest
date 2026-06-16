@@ -83,9 +83,19 @@ curl -X POST "http://HOST/operations" \
   -H "content-type: application/json" \
   -H "x-client-id: 4a8379f7-d924-4064-80bf-974d647de0f2" \
   -H "x-api-key: bee03ffd-3c6f-4e88-8b7b-b4ac673c9cec" \
-  -d '{"inn": "744725130545", "tax_rate": 6, "tax_system": "usn_d", "start_year": 2026}'
+  -d '{
+    "inn": "744725130545",
+    "tax_rate": 6,
+    "tax_system": "usn_d",
+    "start_year": 2026,
+    "pagination": {
+      "page_number": 1,
+      "row_count": 20,
+      "request_id": "07b87c7e-86ef-464c-97a5-1e50036e2167"
+    }
+  }'
 ```
-Поля тела запроса: `Inn` → `inn`, `TaxRate` → `tax_rate`, `TaxSystem` → `tax_system`, `StartYear` → `start_year`.
+`request_id` генерируется как случайный UUID v4 перед каждым запросом — значения никогда не повторяются. Поля `inn`, `tax_rate`, `tax_system`, `start_year` берутся из соответствующей JSONL-записи (`Inn`, `TaxRate`, `TaxSystem`, `StartYear`).
 
 ### GetTasks — GET /tasks
 ```bash

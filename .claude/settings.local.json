@@ -24,7 +24,8 @@
       "Bash(sysctl -n kern.maxfilesperproc)",
       "Bash(.venv/bin/python -m py_compile loadtest.py)",
       "Bash(python3 -)",
-      "Bash(.venv/bin/python -m py_compile /Users/evgenioni/Yandex.Disk.localized/AI/loadtest_replay.py)"
+      "Bash(.venv/bin/python -m py_compile /Users/evgenioni/Yandex.Disk.localized/AI/loadtest_replay.py)",
+      "Bash(.venv/bin/python -)"
     ]
   }
 }
